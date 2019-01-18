@@ -36,7 +36,7 @@ type orchestrator struct {
 }
 
 func (orch *orchestrator) ServiceURI() *url.URL {
-	return orch.node.ServiceURI
+	return orch.node.GetServiceURI()
 }
 
 func (orch *orchestrator) CurrentBlock() *big.Int {

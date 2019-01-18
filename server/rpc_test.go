@@ -354,7 +354,7 @@ func TestGetPaymentSender_GivenValidPaymentTicket(t *testing.T) {
 
 func TestGetOrchestrator_GivenValidSig_ReturnsTranscoderURI(t *testing.T) {
 	orch := &mockOrchestrator{}
-	drivers.NodeStorage = drivers.NewMemoryDriver("")
+	drivers.NodeStorage = drivers.NewMemoryDriver(nil)
 	uri := "http://someuri.com"
 	orch.On("VerifySig", mock.Anything, mock.Anything, mock.Anything).Return(true)
 	orch.On("ServiceURI").Return(url.Parse(uri))
@@ -369,7 +369,7 @@ func TestGetOrchestrator_GivenValidSig_ReturnsTranscoderURI(t *testing.T) {
 
 func TestGetOrchestrator_GivenInvalidSig_ReturnsError(t *testing.T) {
 	orch := &mockOrchestrator{}
-	drivers.NodeStorage = drivers.NewMemoryDriver("")
+	drivers.NodeStorage = drivers.NewMemoryDriver(nil)
 	orch.On("VerifySig", mock.Anything, mock.Anything, mock.Anything).Return(false)
 
 	oInfo, err := getOrchestrator(orch, &net.OrchestratorRequest{})
@@ -381,7 +381,7 @@ func TestGetOrchestrator_GivenInvalidSig_ReturnsError(t *testing.T) {
 
 func TestGetOrchestrator_GivenValidSig_ReturnsOrchTicketParams(t *testing.T) {
 	orch := &mockOrchestrator{}
-	drivers.NodeStorage = drivers.NewMemoryDriver("")
+	drivers.NodeStorage = drivers.NewMemoryDriver(nil)
 	uri := "http://someuri.com"
 	expectedParams := defaultTicketParams()
 	orch.On("VerifySig", mock.Anything, mock.Anything, mock.Anything).Return(true)

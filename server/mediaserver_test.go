@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/hex"
+	"flag"
 	"fmt"
 	"math/big"
 	"math/rand"
@@ -27,7 +28,7 @@ import (
 var S *LivepeerServer
 
 func setupServer() *LivepeerServer {
-	drivers.NodeStorage = drivers.NewMemoryDriver("")
+	drivers.NodeStorage = drivers.NewMemoryDriver(nil)
 	if S == nil {
 		n, _ := core.NewLivepeerNode(nil, "./tmp", nil)
 		S = NewLivepeerServer("127.0.0.1:1938", "127.0.0.1:8080", n)
@@ -334,6 +335,13 @@ func TestGotRTMPStreamHandler(t *testing.T) {
 }
 
 func TestMultiStream(t *testing.T) {
+	//Turning off logging to stderr because this test prints ALOT of logs.
+	//Ideally we would record the flag value and set it back instead of hardcoding the value,
+	// but the `flag` doesn't allow easy access to existing flag value.
+	flag.Set("logtostderr", "false")
+	defer func() {
+		flag.Set("logtostderr", "true")
+	}()
 	s := setupServer()
 	s.RTMPSegmenter = &StubSegmenter{skip: true}
 	handler := gotRTMPStreamHandler(s)
@@ -439,7 +447,7 @@ func TestRegisterConnection(t *testing.T) {
 	drivers.NodeStorage = nil
 	_, err := s.registerConnection(strm)
 	assert.Equal(err, ErrStorage)
-	drivers.NodeStorage = drivers.NewMemoryDriver("")
+	drivers.NodeStorage = drivers.NewMemoryDriver(nil)
 
 	// normal success case
 	rand.Seed(123)
