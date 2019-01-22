@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"sync"
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -315,6 +316,9 @@ func (n *LivepeerNode) transcodeSeg(config transcodeConfig, seg *stream.HLSSegme
 
 	// Prepare the result object
 	var tr TranscodeResult
+	segHashes := make([][]byte, len(tData))
+	segHashLock := &sync.Mutex{}
+
 	for i, _ := range md.Profiles {
 		if tData[i] == nil {
 			glog.Errorf("Cannot find transcoded segment for %v", seg.SeqNo)
@@ -322,9 +326,24 @@ func (n *LivepeerNode) transcodeSeg(config transcodeConfig, seg *stream.HLSSegme
 		}
 		tProfileData[md.Profiles[i]] = tData[i]
 		tr.Data = append(tr.Data, tData[i])
+
+		hash := crypto.Keccak256(tData[i])
+		segHashLock.Lock()
+		segHashes[i] = hash
+		segHashLock.Unlock()
 	}
 	os.Remove(fname)
 	tr.OS = config.OS
+
+	if n == nil || n.Eth == nil {
+		return &tr
+	}
+
+	segHash := crypto.Keccak256(segHashes...)
+	tr.Sig, err = n.Eth.Sign(segHash)
+	if err != nil {
+		glog.Error("Unable to sign hash of transcoded segment hashes")
+	}
 	return &tr
 }
 
