@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"sync"
 	"time"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
@@ -317,7 +316,6 @@ func (n *LivepeerNode) transcodeSeg(config transcodeConfig, seg *stream.HLSSegme
 	// Prepare the result object
 	var tr TranscodeResult
 	segHashes := make([][]byte, len(tData))
-	segHashLock := &sync.Mutex{}
 
 	for i, _ := range md.Profiles {
 		if tData[i] == nil {
@@ -328,9 +326,7 @@ func (n *LivepeerNode) transcodeSeg(config transcodeConfig, seg *stream.HLSSegme
 		tr.Data = append(tr.Data, tData[i])
 
 		hash := crypto.Keccak256(tData[i])
-		segHashLock.Lock()
 		segHashes[i] = hash
-		segHashLock.Unlock()
 	}
 	os.Remove(fname)
 	tr.OS = config.OS
