@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"math/rand"
 	"net/url"
 	"strings"
 	"sync"
@@ -82,7 +83,10 @@ func (o *orchestratorPool) GetOrchestrators(numOrchestrators int) ([]*net.Orches
 			orchInfos = append(orchInfos, info)
 			numSuccessResp++
 		}
-		if numSuccessResp >= numOrchestrators || numResp >= len(o.uris) {
+		if numResp >= len(o.uris) {
+			rand.Seed(time.Now().Unix())
+			n := rand.Int() % len(o.uris)
+			orchInfos = []*net.OrchestratorInfo{orchInfos[n]}
 			orchChan <- struct{}{}
 		}
 	}
