@@ -235,6 +235,7 @@ func (w *wizard) senderInfo() (sender struct {
 
 	err = json.Unmarshal(res, &sender)
 	if err != nil {
+		err = fmt.Errorf("invalid json format of response: %v", res)
 		return
 	}
 
